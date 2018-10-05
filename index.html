@@ -11,68 +11,88 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
     <style>
-        #messages{height:300px;}
+        
+        @font-face {
+            font-family: chatFont;
+            src: url(FlunkiesBB.otf);
+        }
+        
+        #messages {
+            height:500px;
+            font-family: chatFont;
+            color: peachpuff
+        }
+  
     </style>
 </head>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3 col-sm-12">
-            <h1 class="text-center">
-                MongoChat
-                <button id="clear" class="btn btn-danger">Clear</button>
-            </h1>
-            <div id="chat">
-                <input type="text" id="username" class="form-control" placeholder="Enter name...">
-                <br>
-                <div class="card">
-                    <textarea id="messages" class="card-block" readonly style="position:relative"></textarea>
+<body background="bg_1.png">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3 col-sm-12">
+                <h1 class="text-center" style="color:rgb(255, 255, 255)">
+                    MongoChat
+                    <button id="clear" class="btn btn-danger">Clear</button>
+                </h1>
+                <div id="chat">
+                    <input type="text" id="username" class="form-control" placeholder="Enter name...">
+                    <br>
+                    <div class="card">
+                        <textarea id="messages" style="background-image:url(bg_1.png); opacity: 0.9 ; background-attachment: fixed; background-repeat: no-repeat" class="card-block" readonly style="position:relative"></textarea>
+                    </div>
+                    <br>
+                    <textarea id="textarea" class="form-control" placeholder="Enter message..."></textarea>
                 </div>
-                <br>
-                <textarea id="textarea" class="form-control" placeholder="Enter message..."></textarea>
             </div>
         </div>
     </div>
-</div>
-<script>
-    var socket = io()
-    socket.on("chat", addChat)
-    $(() => {
-        getChats()
-        textarea.addEventListener('keydown', function(event){
-                    if(event.which === 13 && event.shiftKey == false){
-                        // Emit to server input
-                        var chatMessage = {
-                            name: $("#username").val(), chat: $("#textarea").val()
+    <script>
+        var socket = io()
+        socket.on("chat", addChat)
+        $(() => {
+            getChats()
+            textarea.addEventListener('keydown', function(event){
+                        if(event.which === 13 && event.shiftKey == false){
+                            // Emit to server input
+                            if( $('#username').val() != '')
+                            {
+                                var chatMessage = {
+                                    name: $("#username").val(), chat: $("#textarea").val()
+                                }
+                                postChat(chatMessage)
+                                var obj = document.getElementById('textarea');
+                                obj.value = '';
+                            }
+                            else{
+                                alert('Plear enter name of the sender!!!!');
+                            }
                         }
-                        postChat(chatMessage)
-                        $("textarea").value = "";
-                    }
-                })
-    })
-
-    function postChat(chat) {
-        $.post("http://localhost:3111/chats", chat)
-    }
-
-    function getChats() {
-        $.get("/chats", (chats) => {
-            chats.forEach(addChat)
+                    })
         })
-    }
 
-    function addChat(chatObj) {
-        var message = document.getElementById('messages');
-        message.value +=  "\n" + chatObj.name+": "+chatObj.chat;
-    }
+        function postChat(chat) {
+            $.post("http://192.168.34.54:3111/chats", chat)
+        }
 
-    socket.on('cleared', function(){
-        var message = document.getElementById('messages');
-        message.value = '';
-    });
+        function getChats() {
+            $.get("/chats", (chats) => {
+                chats.forEach(addChat)
+            })
+        }
 
-    // Handle Chat Clear
-    clear.addEventListener('click', function(){
-        $.post("http://localhost:3111/clear")
-    });
+        function addChat(chatObj) {
+            var message = document.getElementById('messages');
+            message.value +=  "\n" + chatObj.name+": "+chatObj.chat;
+        }
 
-</script>
+        socket.on('cleared', function(){
+            var message = document.getElementById('messages');
+            message.value = '';
+        });
+
+        // Handle Chat Clear
+        clear.addEventListener('click', function(){
+            $.post("http://192.168.34.54:3111/clear")
+        });
+
+    </script>
+</body>
